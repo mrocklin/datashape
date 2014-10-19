@@ -5,7 +5,8 @@ from .coretypes import *
 # https://github.com/ContinuumIO/datashape/blob/master/docs/source/types.rst
 
 __all__ = ['isdimension', 'ishomogeneous', 'istabular', 'isfixed', 'isscalar',
-        'isrecord', 'iscollection', 'isnumeric', 'isboolean', 'isdatelike']
+        'isrecord', 'iscollection', 'isnumeric', 'isboolean', 'isdatelike',
+        'isreal']
 
 dimension_types = (Fixed, Var, Ellipsis, int)
 
@@ -196,6 +197,26 @@ def isboolean(ds):
         ds = ds.ty
     return ds == bool_
 
+
+def isreal(ds):
+    """ Has a numeric measure
+
+    >>> isreal('float32')
+    True
+    >>> isreal('3 * ?real')
+    True
+    >>> isreal('string')
+    False
+    >>> isreal('var * {amount: ?float32}')
+    False
+    """
+    if isinstance(ds, str):
+        ds = dshape(ds)
+    if isinstance(ds, DataShape):
+        ds = ds.measure
+    if isinstance(ds, Option):
+        ds = ds.ty
+    return isinstance(ds, Unit) and 'float' in str(ds)
 
 def isdatelike(ds):
     """ Has a date or datetime measure
